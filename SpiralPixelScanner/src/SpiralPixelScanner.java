@@ -5,7 +5,11 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -16,15 +20,15 @@ import java.awt.image.BufferedImage;
 public class SpiralPixelScanner {
     
     // Settings
-    static int SIZE = 19; /* ODD ONLY */
-    static int GAP = 0;
-    static int hSIZE = SIZE / 2;
+    final static int SIZE = 549; /* ODD ONLY */
+    final static int GAP = 0;
+    final static int HSIZE = SIZE / 2;
     
     // Pixels to locate (examples) RGB values from 0-255
-    static int[] pix0 = {255,0,0};
-    static int[] pix1 = {0,255,0};
-    static int[] pix2 = {0,0,255};
-    static int[][] pixels = {pix0,pix1,pix2};
+    static int[] pix0 = {255,219,195};
+//    static int[] pix1 = {0,255,0};
+//    static int[] pix2 = {0,0,255};
+    static int[][] pixels = {pix0};
 
     /**
      * Compare the model (RGB values) to the pixel color
@@ -67,7 +71,7 @@ public class SpiralPixelScanner {
     }
     
     /**
-     * iterate over every pixel in a bImg (must be an odd square) and
+     * iterate over every pixel in a bImg (must be an even square) and
      * determines if a pixel matches the desired pixel
      * 
      * @param bImg Buffered image that has square screenshot
@@ -76,8 +80,8 @@ public class SpiralPixelScanner {
      */
     public static Point scan(BufferedImage bImg, int[][] pixels) {
         
-        int posX = hSIZE;
-        int posY = hSIZE;
+        int posX = HSIZE;
+        int posY = HSIZE;
         int move = 1;
         Color color;
         boolean stop = false;
@@ -93,7 +97,7 @@ public class SpiralPixelScanner {
         do {
             
             // Left
-            if (iteration == hSIZE) move--;
+            if (iteration == HSIZE) move--;
             for (int i = 0; i < move && !stop; i++) {
                 posX--;
                 //System.out.println("Comparing at: " + posX + "," + posY);
@@ -103,7 +107,7 @@ public class SpiralPixelScanner {
             }
 
             // Up
-            if (iteration == hSIZE) stop = true;
+            if (iteration == HSIZE) stop = true;
             for (int i = 0; i < move && !stop; i++) {
                 posY--;
                 //System.out.println("Comparing at: " + posX + "," + posY);
@@ -170,11 +174,12 @@ public class SpiralPixelScanner {
             
             // Prepare the square
             mouseP = MouseInfo.getPointerInfo().getLocation();
-            mouseX = (int)mouseP.getX() - hSIZE;
-            mouseY = (int)mouseP.getY() - hSIZE;
+            mouseX = (int)mouseP.getX() - HSIZE;
+            mouseY = (int)mouseP.getY() - HSIZE;
             robot = new Robot();
             img = new Rectangle(mouseX, mouseY, SIZE, SIZE);
-
+            
+            
             // Get image for scanning
             while (true) {
                 bImg = robot.createScreenCapture(img);
@@ -183,12 +188,16 @@ public class SpiralPixelScanner {
                     
                     // Actions to be taken if a desired pixel has been located
                     robot.mouseMove(mouseX + (int)point.getX(), mouseY + (int)point.getY() );
+                    Thread.sleep(50);
+                    robot.mousePress(InputEvent.BUTTON1_MASK);
+                    Thread.sleep(50);
+                    robot.mouseRelease(InputEvent.BUTTON1_MASK);
                 }
             }
         } catch (AWTException ex) {
             System.err.println("AWTException");
         } catch (InterruptedException ex) {
-            System.out.println("InterruptedException");
+            Logger.getLogger(SpiralPixelScanner.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
