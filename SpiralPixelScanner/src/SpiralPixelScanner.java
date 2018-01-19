@@ -1,4 +1,3 @@
-
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.MouseInfo;
@@ -7,9 +6,6 @@ import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -26,16 +22,82 @@ public class SpiralPixelScanner {
     
     // Pixels to locate (examples) RGB values from 0-255
     static int[] pix0 = {255,219,195};
-//    static int[] pix1 = {0,255,0};
-//    static int[] pix2 = {0,0,255};
     static int[][] pixels = {pix0};
 
+    /**
+     * Iterate over every pixel in a bImg (must be an even square) and
+     * determines if a pixel matches the desired pixel
+     * 
+     * @param bImg Buffered image that has square screenshot
+     * @param pixels array of RGB pixels / models
+     * @return relative point of the rectangle
+     */
+    public static Point scan(BufferedImage bImg, int[][] pixels) {
+        
+        int posX = HSIZE;
+        int posY = HSIZE;
+        int move = 1;
+        int iteration = 0;
+        boolean stop = false;
+        Color color;
+        
+        
+        if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
+            return new Point(posX, posY);
+        }
+        
+        do {
+            
+            // Left
+            if (iteration == HSIZE) move--;
+            for (int i = 0; i < move && !stop; i++) {
+                posX--;
+                if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
+                    return new Point(posX, posY);
+                }
+            }
+
+            // Up
+            if (iteration == HSIZE) stop = true;
+            for (int i = 0; i < move && !stop; i++) {
+                posY--;
+                if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
+                    return new Point(posX, posY);
+                }
+            }
+
+            move++;
+
+            // Right
+            for (int i = 0; i < move && !stop; i++) {
+                posX++;
+                if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
+                    return new Point(posX, posY);
+                }
+            }
+
+            // Down
+            for (int i = 0; i < move && !stop; i++) {
+                posY++;
+                if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
+                    return new Point(posX, posY);
+                }
+            }
+
+            move++;
+            iteration++;
+
+        } while (!stop);
+        
+        return null;
+    }    
+    
     /**
      * Compare the model (RGB values) to the pixel color
      * 
      * @param pixels desired RGB value
      * @param color color of the scanned pixel
-     * @return match found (within tolerance)
+     * @return match found
      */
     public static boolean compare(int[][] pixels, Color color) {
         
@@ -57,92 +119,11 @@ public class SpiralPixelScanner {
      * 
      * @param target desired value
      * @param result result value
-     * @return match found (within tolerance)
+     * @return match found
      */
     private static boolean gap(int target, int result) {
         
-        
-//        int lower = target - GAP;
-//        int upper = target + GAP;
-//        
-//        return result >= lower && result <= upper;
          return target == result;
-        
-    }
-    
-    /**
-     * iterate over every pixel in a bImg (must be an even square) and
-     * determines if a pixel matches the desired pixel
-     * 
-     * @param bImg Buffered image that has square screenshot
-     * @param pixels array of RGB pixels / models
-     * @return relative point of the rectangle
-     */
-    public static Point scan(BufferedImage bImg, int[][] pixels) {
-        
-        int posX = HSIZE;
-        int posY = HSIZE;
-        int move = 1;
-        Color color;
-        boolean stop = false;
-        int iteration = 0;
-        
-        //System.out.println(bImg);
-        
-        //System.out.println("Comparing at: " + posX + "," + posY);
-        if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
-            return new Point(posX, posY);
-        }
-        
-        do {
-            
-            // Left
-            if (iteration == HSIZE) move--;
-            for (int i = 0; i < move && !stop; i++) {
-                posX--;
-                //System.out.println("Comparing at: " + posX + "," + posY);
-                if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
-                    return new Point(posX, posY);
-                }
-            }
-
-            // Up
-            if (iteration == HSIZE) stop = true;
-            for (int i = 0; i < move && !stop; i++) {
-                posY--;
-                //System.out.println("Comparing at: " + posX + "," + posY);
-                if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
-                    return new Point(posX, posY);
-                }
-            }
-
-            move++;
-
-            // Right
-            for (int i = 0; i < move && !stop; i++) {
-                posX++;
-                //System.out.println("Comparing at: " + posX + "," + posY);
-                if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
-                    return new Point(posX, posY);
-                }
-            }
-
-            // Down
-            for (int i = 0; i < move && !stop; i++) {
-                posY++;
-                //System.out.println("Comparing at: " + posX + "," + posY);
-                if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
-                    return new Point(posX, posY);
-                }
-            }
-
-            move++;
-            iteration++;
-
-        } while (!stop);
-        
-        return null;
-        
     }
 
     /**
@@ -153,14 +134,13 @@ public class SpiralPixelScanner {
         
         int mouseX;
         int mouseY;
-        Point mouseP;
         int magicNum;
+        int sleep = 5;
+        Point mouseP;
+        Point point;
         BufferedImage bImg;
         Robot robot;
         Rectangle img;
-        Point point;
-        
-        int sleep = 5;
         
         try {
             
@@ -180,10 +160,12 @@ public class SpiralPixelScanner {
             img = new Rectangle(mouseX, mouseY, SIZE, SIZE);
             
             
-            // Get image for scanning
             while (true) {
+                
+                // Get image for scanning
                 bImg = robot.createScreenCapture(img);
                 point = scan(bImg, pixels);
+                
                 if (point != null) {
                     
                     // Actions to be taken if a desired pixel has been located
@@ -197,7 +179,7 @@ public class SpiralPixelScanner {
         } catch (AWTException ex) {
             System.err.println("AWTException");
         } catch (InterruptedException ex) {
-            Logger.getLogger(SpiralPixelScanner.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("InterruptedException");
         }
     }
 }
