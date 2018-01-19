@@ -159,7 +159,6 @@ public class SpiralPixelScanner {
             robot = new Robot();
             img = new Rectangle(mouseX, mouseY, SIZE, SIZE);
             
-            
             while (true) {
                 
                 // Get image for scanning
