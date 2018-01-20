@@ -16,9 +16,8 @@ import java.awt.image.BufferedImage;
 public class SpiralPixelScanner {
     
     // Settings
-    final static int SIZE = 549; /* ODD ONLY */
-    final static int GAP = 0;
-    final static int HSIZE = SIZE / 2;
+    final static int SIZE_OF_RECT = 549; /* ODD ONLY */
+    final static int HALF_SIZE_OF_RECT = SIZE_OF_RECT / 2;
     
     // Pixels to locate (examples) RGB values from 0-255
     static int[] pix0 = {255,219,195};
@@ -34,8 +33,8 @@ public class SpiralPixelScanner {
      */
     public static Point scan(BufferedImage bImg, int[][] pixels) {
         
-        int posX = HSIZE;
-        int posY = HSIZE;
+        int posX = HALF_SIZE_OF_RECT;
+        int posY = HALF_SIZE_OF_RECT;
         int move = 1;
         int iteration = 0;
         boolean stop = false;
@@ -49,7 +48,7 @@ public class SpiralPixelScanner {
         do {
             
             // Left
-            if (iteration == HSIZE) move--;
+            if (iteration == HALF_SIZE_OF_RECT) move--;
             for (int i = 0; i < move && !stop; i++) {
                 posX--;
                 if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
@@ -58,7 +57,7 @@ public class SpiralPixelScanner {
             }
 
             // Up
-            if (iteration == HSIZE) stop = true;
+            if (iteration == HALF_SIZE_OF_RECT) stop = true;
             for (int i = 0; i < move && !stop; i++) {
                 posY--;
                 if (compare(pixels, new Color(bImg.getRGB(posX, posY)))) {
@@ -86,7 +85,7 @@ public class SpiralPixelScanner {
 
             move++;
             iteration++;
-
+            
         } while (!stop);
         
         return null;
@@ -154,10 +153,10 @@ public class SpiralPixelScanner {
             
             // Prepare the square
             mouseP = MouseInfo.getPointerInfo().getLocation();
-            mouseX = (int)mouseP.getX() - HSIZE;
-            mouseY = (int)mouseP.getY() - HSIZE;
+            mouseX = (int)mouseP.getX() - HALF_SIZE_OF_RECT;
+            mouseY = (int)mouseP.getY() - HALF_SIZE_OF_RECT;
             robot = new Robot();
-            img = new Rectangle(mouseX, mouseY, SIZE, SIZE);
+            img = new Rectangle(mouseX, mouseY, SIZE_OF_RECT, SIZE_OF_RECT);
             
             while (true) {
                 
