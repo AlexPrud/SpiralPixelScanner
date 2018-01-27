@@ -24,7 +24,7 @@ public class SpiralPixelScanner {
     static int[][] pixels = {pix0};
 
     /**
-     * Iterate over every pixel in a bImg (must be an even square) and
+     * Iterate over every pixel in a bImg (must be an odd square) and
      * determines if a pixel matches the desired pixel
      * 
      * @param bImg Buffered image that has square screenshot
